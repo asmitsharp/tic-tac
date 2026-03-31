@@ -1,4 +1,4 @@
-#Assignment realted urls
+# Assignment related urls
 Frontend : https://tic-tac-ten-lake.vercel.app/
 Backend : https://api.cashlens.in/
 
