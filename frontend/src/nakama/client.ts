@@ -1,8 +1,18 @@
 import { Client, Session } from "@heroiclabs/nakama-js"
 import type { MatchmakerMatched, Socket } from "@heroiclabs/nakama-js"
-import type { GameState } from "../types/game"
+import type { CreatedRoom, GameState, RoomMode, RoomSummary } from "../types/game"
 
-const client = new Client("defaultkey", "127.0.0.1", "7350", false)
+const NAKAMA_SERVER_KEY = import.meta.env.VITE_NAKAMA_SERVER_KEY ?? "defaultkey"
+const NAKAMA_HOST = import.meta.env.VITE_NAKAMA_HOST ?? "127.0.0.1"
+const NAKAMA_PORT = import.meta.env.VITE_NAKAMA_PORT ?? "7350"
+const NAKAMA_SSL = import.meta.env.VITE_NAKAMA_SSL === "true"
+
+const client = new Client(
+  NAKAMA_SERVER_KEY,
+  NAKAMA_HOST,
+  NAKAMA_PORT,
+  NAKAMA_SSL,
+)
 
 let session: Session | null = null
 let socket: Socket | null = null
@@ -16,14 +26,14 @@ export async function authenticate(username: string): Promise<Session> {
 
 export async function connectSocket(): Promise<Socket> {
   if (!session) throw new Error("Not authenticated")
-  socket = client.createSocket(false, false)
+  socket = client.createSocket(NAKAMA_SSL, false)
   await socket.connect(session, true)
   return socket
 }
 
-export async function findMatch(): Promise<string> {
+export async function findMatch(mode: RoomMode): Promise<string> {
   if (!socket) throw new Error("Socket not connected")
-  const ticket = await socket.addMatchmaker("*", 2, 2)
+  const ticket = await socket.addMatchmaker("*", 2, 2, { mode })
   return ticket.ticket
 }
 
@@ -36,6 +46,29 @@ export async function joinMatch(matchId?: string, token?: string): Promise<strin
   if (!socket) throw new Error("Socket not connected")
   const match = await socket.joinMatch(matchId, token)
   return match.match_id
+}
+
+export async function leaveMatch(matchId: string): Promise<void> {
+  if (!socket) return
+  await socket.leaveMatch(matchId)
+}
+
+export async function createRoom(mode: RoomMode): Promise<CreatedRoom> {
+  if (!session) throw new Error("Not authenticated")
+  const response = await client.rpc(session, "create_match", { mode })
+  return parseRpcPayload<CreatedRoom>(response.payload)
+}
+
+export async function listRooms(mode?: RoomMode): Promise<RoomSummary[]> {
+  if (!session) throw new Error("Not authenticated")
+  const response = await client.rpc(session, "list_rooms", mode ? { mode } : {})
+  return parseRpcPayload<{ rooms: RoomSummary[] }>(response.payload).rooms ?? []
+}
+
+export async function getMatchState(matchId: string): Promise<GameState> {
+  if (!session) throw new Error("Not authenticated")
+  const response = await client.rpc(session, "get_match_state", { match_id: matchId })
+  return parseRpcPayload<GameState>(response.payload)
 }
 
 export function sendMove(matchId: string, cellIndex: number): void {
@@ -65,4 +98,14 @@ export function onMatchmakerMatched(
 export function getSession(): Session {
   if (!session) throw new Error("Not authenticated")
   return session
+}
+
+function parseRpcPayload<T>(payload?: object | string): T {
+  if (!payload) {
+    throw new Error("Missing RPC payload")
+  }
+  if (typeof payload === "string") {
+    return JSON.parse(payload) as T
+  }
+  return payload as T
 }

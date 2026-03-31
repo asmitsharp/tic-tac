@@ -27,11 +27,17 @@ export default function Login({ onLogin }: Props) {
 
   return (
     <div style={styles.card}>
-      <h1 style={styles.title}>Tic-Tac-Toe</h1>
-      <p style={styles.subtitle}>Enter your name to play</p>
+      <p style={styles.badge}>Realtime Multiplayer</p>
+      <h1 style={styles.title}>Tic-Tac-Toe Arena</h1>
+      <p style={styles.subtitle}>
+        Sign in with a display name to enter matchmaking, create private rooms,
+        or test timed mode.
+      </p>
       <input
         style={styles.input}
-        placeholder="Your name"
+        autoFocus
+        maxLength={20}
+        placeholder="Enter your display name"
         value={username}
         onChange={(e) => setUsername(e.target.value)}
         onKeyDown={(e) => e.key === "Enter" && handleSubmit()}
@@ -47,37 +53,57 @@ export default function Login({ onLogin }: Props) {
 
 const styles: Record<string, CSSProperties> = {
   card: {
-    background: "#16213e",
-    borderRadius: 16,
-    padding: "40px 48px",
+    width: "min(92vw, 460px)",
+    background: "#ffffff",
+    borderRadius: 28,
+    padding: "40px 30px",
     display: "flex",
     flexDirection: "column",
     alignItems: "center",
-    gap: 16,
-    minWidth: 320,
+    gap: 18,
+    boxShadow: "0 24px 60px rgba(0, 0, 0, 0.12)",
   },
-  title: { margin: 0, fontSize: 32, fontWeight: 700 },
-  subtitle: { margin: 0, color: "#a0aec0" },
+  badge: {
+    margin: 0,
+    color: "#666666",
+    fontSize: 12,
+    textTransform: "uppercase",
+    letterSpacing: "0.12em",
+  },
+  title: {
+    margin: 0,
+    fontSize: "clamp(2.2rem, 6vw, 3.6rem)",
+    lineHeight: 1,
+    fontWeight: 800,
+    color: "#111111",
+  },
+  subtitle: {
+    margin: 0,
+    color: "#555555",
+    lineHeight: 1.55,
+    fontSize: 15,
+    textAlign: "center",
+  },
   input: {
     width: "100%",
-    padding: "12px 16px",
-    borderRadius: 8,
-    border: "1px solid #2d3748",
-    background: "#0f3460",
-    color: "white",
+    padding: "14px 16px",
+    borderRadius: 14,
+    border: "1px solid #d0d0d0",
+    background: "#f5f5f5",
+    color: "#111111",
     fontSize: 16,
     boxSizing: "border-box",
   },
   button: {
     width: "100%",
-    padding: "12px 16px",
-    borderRadius: 8,
+    padding: "14px 16px",
+    borderRadius: 14,
     border: "none",
-    background: "#e94560",
-    color: "white",
+    background: "#111111",
+    color: "#ffffff",
     fontSize: 16,
-    fontWeight: 600,
+    fontWeight: 700,
     cursor: "pointer",
   },
-  error: { color: "#fc8181", margin: 0 },
+  error: { color: "#8a3b3b", margin: 0, textAlign: "center", lineHeight: 1.5 },
 }

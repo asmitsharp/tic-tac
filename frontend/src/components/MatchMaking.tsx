@@ -5,13 +5,21 @@ import {
   joinMatch,
   onMatchmakerMatched,
 } from "../nakama/client"
+import type { RoomMode } from "../types/game"
 
 interface Props {
+  mode: RoomMode
   username: string
+  onBack: () => void
   onMatchFound: (matchId: string) => void
 }
 
-export default function Matchmaking({ username, onMatchFound }: Props) {
+export default function Matchmaking({
+  mode,
+  username,
+  onBack,
+  onMatchFound,
+}: Props) {
   const [status, setStatus] = useState("Searching for a player...")
 
   useEffect(() => {
@@ -33,7 +41,7 @@ export default function Matchmaking({ username, onMatchFound }: Props) {
     })
 
     // Enter the matchmaker pool
-    findMatch()
+    findMatch(mode)
       .then((matchTicket) => {
         ticket = matchTicket
       })
@@ -48,39 +56,88 @@ export default function Matchmaking({ username, onMatchFound }: Props) {
         void cancelMatchmaking(ticket).catch(() => {})
       }
     }
-  }, [onMatchFound])
+  }, [mode, onMatchFound])
 
   return (
     <div style={styles.card}>
-      <div style={styles.spinner} />
+      <div style={styles.spinnerWrap}>
+        <div style={styles.spinner} />
+      </div>
+      <p style={styles.badge}>{mode === "timed" ? "Timed Queue" : "Classic Queue"}</p>
+      <h2 style={styles.title}>Looking for an opponent</h2>
       <p style={styles.status}>{status}</p>
       <p style={styles.hint}>Signed in as {username}</p>
-      <p style={styles.hint}>
-        Open another browser tab to play against yourself
-      </p>
+      <p style={styles.hint}>Keep this screen open while the server matches you.</p>
+      <button style={styles.button} onClick={onBack}>
+        Back to Lobby
+      </button>
     </div>
   )
 }
 
 const styles: Record<string, CSSProperties> = {
   card: {
-    background: "#16213e",
-    borderRadius: 16,
-    padding: "40px 48px",
+    width: "min(92vw, 420px)",
+    background: "#ffffff",
+    borderRadius: 28,
+    padding: "40px 30px",
     display: "flex",
     flexDirection: "column",
     alignItems: "center",
-    gap: 20,
-    minWidth: 320,
+    gap: 16,
+    boxShadow: "0 24px 60px rgba(0, 0, 0, 0.12)",
+  },
+  spinnerWrap: {
+    width: 90,
+    height: 90,
+    borderRadius: "50%",
+    display: "flex",
+    alignItems: "center",
+    justifyContent: "center",
+    background: "#f3f3f3",
   },
   spinner: {
     width: 48,
     height: 48,
-    border: "4px solid #2d3748",
-    borderTop: "4px solid #e94560",
+    border: "4px solid #d7d7d7",
+    borderTop: "4px solid #111111",
     borderRadius: "50%",
     animation: "spin 1s linear infinite",
   },
-  status: { fontSize: 18, fontWeight: 600, margin: 0 },
-  hint: { color: "#a0aec0", margin: 0, fontSize: 14, textAlign: "center" },
+  badge: {
+    margin: 0,
+    padding: "6px 12px",
+    borderRadius: 999,
+    background: "#efefef",
+    color: "#333333",
+    fontSize: 12,
+    fontWeight: 700,
+    textTransform: "uppercase",
+    letterSpacing: "0.08em",
+  },
+  title: {
+    margin: 0,
+    color: "#111111",
+    fontSize: 30,
+    fontWeight: 700,
+  },
+  status: {
+    color: "#333333",
+    fontSize: 18,
+    fontWeight: 600,
+    lineHeight: 1.5,
+    margin: 0,
+  },
+  hint: { color: "#666666", margin: 0, fontSize: 14, textAlign: "center" },
+  button: {
+    marginTop: 8,
+    padding: "12px 18px",
+    borderRadius: 14,
+    border: "1px solid #cfcfcf",
+    background: "#ffffff",
+    color: "#111111",
+    fontSize: 15,
+    fontWeight: 700,
+    cursor: "pointer",
+  },
 }

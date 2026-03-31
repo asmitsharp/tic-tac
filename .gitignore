@@ -23,11 +23,14 @@ frontend/node_modules/
 frontend/dist/
 frontend/dist-ssr/
 frontend/.vite/
+frontend/.env
+frontend/.env.*
 frontend/*.local
 frontend/.DS_Store
 
 # Nakama / Go build artifacts
 nakama/backend/backend.so
+nakama/.env
 
 # Misc local scratch files
 %F{blue}%c%f
