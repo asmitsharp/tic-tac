@@ -1,3 +1,7 @@
+#Assignment realted urls
+Frontend : https://tic-tac-ten-lake.vercel.app/
+Backend : https://api.cashlens.in/
+
 # Tic-Tac-Toe Multiplayer
 
 This project is a two-player tic-tac-toe game built with a React frontend and a Nakama backend. The game logic is server-authoritative: moves are validated on the server, game state lives on the server, and the frontend only renders the latest state it receives over Nakama realtime updates.
