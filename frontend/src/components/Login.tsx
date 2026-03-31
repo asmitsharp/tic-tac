@@ -18,8 +18,8 @@ export default function Login({ onLogin }: Props) {
       await authenticate(username.trim())
       await connectSocket()
       onLogin(username.trim())
-    } catch {
-      setError("Failed to connect. Is Nakama running?")
+    } catch (error: unknown) {
+      setError(getLoginErrorMessage(error))
     } finally {
       setLoading(false)
     }
@@ -106,4 +106,26 @@ const styles: Record<string, CSSProperties> = {
     cursor: "pointer",
   },
   error: { color: "#8a3b3b", margin: 0, textAlign: "center", lineHeight: 1.5 },
+}
+
+function getLoginErrorMessage(error: unknown): string {
+  if (
+    typeof error === "object" &&
+    error !== null &&
+    "status" in error &&
+    error.status === 409
+  ) {
+    return "Username already exists. Try a different display name."
+  }
+
+  if (
+    typeof error === "object" &&
+    error !== null &&
+    "status" in error &&
+    error.status === 401
+  ) {
+    return "Server key mismatch. Check the frontend and backend configuration."
+  }
+
+  return "Failed to connect. Is Nakama running?"
 }
