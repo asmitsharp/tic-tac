@@ -1,0 +1,48 @@
+services:
+  postgres:
+    image: postgres:12.2-alpine
+    environment:
+      POSTGRES_DB: nakama
+      POSTGRES_PASSWORD: localdb
+    volumes:
+      - data:/var/lib/postgresql/data
+
+  nakama:
+    image: heroiclabs/nakama:3.22.0
+    platform: linux/amd64
+    entrypoint:
+      - "/bin/sh"
+      - "-ecx"
+      - >
+        /nakama/nakama migrate up --database.address postgres:localdb@postgres/nakama &&
+        exec /nakama/nakama --config /nakama/data/local.yml
+        --database.address postgres:localdb@postgres/nakama
+        --runtime.path /nakama/data/modules
+    restart: always
+    links:
+      - postgres
+    depends_on:
+      postgres:
+        condition: service_started
+      plugin-builder:
+        condition: service_completed_successfully
+    volumes:
+      - ./backend:/nakama/data/modules
+      - ./local.yml:/nakama/data/local.yml
+    ports:
+      - "7349:7349"
+      - "7350:7350"
+      - "7351:7351"
+
+  plugin-builder:
+    image: heroiclabs/nakama-pluginbuilder:3.22.0
+    platform: linux/amd64
+    environment:
+      - GOPATH=/builder/go
+    volumes:
+      - ./backend:/backend
+    working_dir: /backend
+    command: build --trimpath --mod=vendor -buildmode=plugin -o ./backend.so .
+
+volumes:
+  data:

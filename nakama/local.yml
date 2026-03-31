@@ -1,0 +1,8 @@
+name: nakama
+data_dir: /nakama/data 
+
+runtime:
+  go_entrypoint: "backend" 
+
+logger:
+  level: DEBUG
